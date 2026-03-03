@@ -1,78 +1,44 @@
-# Nexup Backend Challenge
+# Nexup Backend Challenge - Solución
 
-En este repositorio, se encuentra la prueba técnica para el puesto de Backend Developer en Nexup.
+Esta es mi resolución para el desafío técnico de Nexup.
 
-Este challenge está diseñado para evaluar tus habilidades de Kotlin y resolución de problemas.
+## 🏗️ Arquitectura
+Se aplicaron principios de Clean Architecture y Domain-Driven Design (DDD) para garantizar el desacoplamiento y la escalabilidad del sistema:
 
-## Problema a resolver
-
-Crear las clases y funciones necesarias para resolver el siguiente problema:
-- Se tiene una **cadena de supermercados**
-- Se tienen **productos**, cada uno con un ID único, nombre y precio
-- Se tienen **supermercados**, cada uno con un ID único, nombre, un listado de productos y el stock asociado a cada uno (el stock puede variar entre los distintos supermercados)
-    - Los supermercados comparten los distintos productos
-
-- Funcionalidades requeridas para cada _supermercado_:
-  - Registrar una venta de un producto
-    - Dado un ID de producto y una cantidad a vender, se debe registrar la venta de un producto
-    - La función debe retornar el precio total de la venta
-  - Obtener la cantidad vendida de un producto
-    - Dado un ID de producto, retornar la cantidad vendida de dicho producto
-  - Obtener ingresos por ventas de un producto
-    - Dado un ID de producto, retornar el dinero obtenido de las ventas de dicho producto
-  - Obtener ingresos totales
-    - Retornar el dinero total obtenido de todas las ventas realizadas
-
-- Funcionalidades requeridas para la _cadena de supermercados_:
-  - Obtener los 5 productos más vendidos
-    - Buscar los 5 productos más vendidos en toda la cadena  
-    - Retornar un _string_ con el formato `<nombre_producto>: cantidad_vendida`, concatenados con un guión
-  - Obtener ingresos totales
-    - Retornar el dinero total obtenido de todas las ventas realizadas en toda la cadena
-  - Obtener el supermercado con mayor cantidad de ingresos por ventas
-    - Retornar un _string_ con el formato `<nombre_supermercado> (<id>). Ingresos totales: <ingresos>`
- 
-Para cada una de las funcionalidades planteadas:
-- Definir los nombres de las funciones, parámetros y demás datos cómo consideres adecuado
-- Documentar y comentar el código dónde consideres necesario
-- Manejar todos los casos de error que consideres necesarios
-- Agregar todos los tests que consideres necesarios
-
-### Objetivo opcional
-
-Se desea manejar para cada supermercado su hora de apertura y cierre, así cómo los días donde se encuentra abierto. Agregar los datos necesarios para manejar dicha información.
-
-Sobre la cadena de supermercados, agregar una funcionalidad que, dado un cierto día y horario, se pueda obtener la lista de supermercados abiertos en ese momento.
-Se espera obtener la respuesta como un _string_ con el formato `<nombre_supermercado> (<id>)`, y se concatenen con una coma.
+* `core/domain/models`: Contiene las entidades de negocio (Supermarket, Product, Sale, OpenHours) y las interfaces de los repositorios.
+* `core/service`: Casos de uso y lógica de dominio (por ejemplo `registerSale`).
+* `infraestructure/delivery`: DTOs y mappers para la capa de entrega.
+* `infraestructure/persistence`: Implementaciones en memoria para pruebas.
 
 
-## Pasos a seguir:
-1. Clone este repositorio en su máquina local usando Git.
-   ```bash
-   git clone https://gitlab.com/nexup/nexup-backend-challenge.git
-   ```
-2. Crea un repositorio vacío en tu cuenta de GitHub con el mismo nombre de este.
-   ```bash
-    nexup-backend-challenge
-   ```
-3. Muevesé a la carpeta del proyecto.
-   ```bash
-   cd ./nexup-backend-challenge
-   ```
-4. Cambia la URL remota del repositorio clonado de GitHub, por la URL de tu repositorio.
-   ```bash
-   git remote set-url origin <tu-repositorio.git>
-   ```
-5. Sube el código a tu repositorio.
+## 🛠️ Decisiones Técnicas
 
-## Recomendaciones
-- **No** hagas un _fork_ de este repositorio.
-- **No** hagas _push_ directamente a este repositorio.
-- Crea un commit por cada cambio que realices. Utiliza mensajes **claros** y **descriptivos** para documentar tu proceso.
-- No es necesario el uso de base de datos ni archivos para manejar los datos de prueba. Podes utilizar estructuras de datos en memoria.
-- Dentro del proyecto se encuentra un archivo de ejemplo para ejecución de las pruebas, modificarlo como sea necesario para adaptarlo al problema.
-  - En el archivo de pruebas se encuentra un ejemplo de datos a usar en la ejecución de los Tests
+* Kotlin Puro: Se decidió no utilizar Spring Boot para demostrar solidez en el lenguaje base y evitar over-engineering.
+* IDs de tipo `Long`: Se utilizaron identificadores numéricos de 64 bits para mantener consistencia con estándares de bases de datos relacionales como PostgreSQL.
+* Value Objects: La gestión de horarios (`OpenHours`) se encapsuló en un objeto de valor con su propia lógica de validación.
+* DTOs: Se implementaron Data Transfer Objects para el retorno de información, evitando exponer las entidades de dominio directamente.
 
-## Entregables
-- Un enlace a un repositorio de GitHub con el código resolviendo el problema planteado.
-- Opcional: Un archivo README con explicaciones sobre el enfoque utilizado y cualquier otra información relevante.
+
+## 📁 Estructura principal del proyecto
+
+- `src/Main.kt` - punto de entrada (ejemplo)
+- `src/main/kotlin/core/domain/models/` - modelos: `Product.kt`, `Sale.kt`, `Supermarket.kt`, `SupermarketChain.kt`, `OpenHours.kt`
+- `src/main/kotlin/core/service/` - lógica de negocio (p.ej. `registerSale.kt`)
+- `src/main/kotlin/infraestructure/delivery/dtos/` - DTOs: `SaleResponseDTO.kt`, `SupermarketReportDTO.kt`
+- `src/main/kotlin/infraestructure/delivery/mapper/` - mappers: `MapperExtensions.kt`
+- `test/ChallengeTests.kt` - pruebas de ejemplo
+- `docs/diagram.puml` - diagrama de clases en PlantUML
+
+
+## 📊 Documentación Visual
+
+Se incluyó un archivo `docs/diagram.puml` con el diagrama de clases del sistema. Este documento detalla la relación entre las entidades de dominio, sirviendo como guía para la implementación de la arquitectura. Puedes renderizarlo con PlantUML (extensión de VSCode o plantuml.jar).
+Se puede visualizar como imagen en [`docs/diagram.png`](docs/diagram.png).
+
+## ✅ Notas finales
+- Este proyecto está preparado para ejecutarse y ser probado sin necesidad de una base de datos: usa estructuras en memoria para las pruebas.
+- Para expandirlo, se recomienda añadir un `build.gradle.kts`, configuración de CI y tests adicionales que cubran los casos límite (stock insuficiente, ventas concurrentes, formato de reportes).
+
+
+---
+Actualizado para reflejar la estructura del proyecto en `src/main/kotlin` y los paquetes actuales.

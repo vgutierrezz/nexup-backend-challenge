@@ -1,0 +1,58 @@
+@startuml
+' Diagrama de clases - Nexup Backend Challenge
+' Basado en el código Kotlin actual del proyecto
+
+skinparam classAttributeIconSize 0
+
+' ========== DOMAIN MODELS ==========
+package "Domain::Models" {
+
+  class Product <<dataclass>> {
+    + id: Long
+    + name: String
+    + price: Double
+  }
+
+  class Sale <<dataclass>> {
+    + id: Long
+    + productId: Long
+    + quantity: Int
+    + supermarketId: Long
+    + totalPrice: Double
+    + timestamp: LocalDate (default: LocalDate.now())
+  }
+
+  class OpenHours <<dataclass>> {
+    + daysOpen: Set<DayOfWeek>
+    + openTime: LocalTime
+    + closeTime: LocalTime
+  }
+
+  class Supermarket <<dataclass>> {
+    + id: Long
+    + name: String
+    + stock: MutableMap<Product, Int>
+    + sales: MutableList<Sale>
+    + hours: OpenHours? (nullable)
+  }
+
+  class SupermarketChain <<dataclass>> {
+    + id: Long
+    + listSupermarket: List<Supermarket>
+  }
+}
+
+' ========== RELACIONES ==========
+
+' Composición
+Supermarket "1" *-- "*" Sale : contiene sales >
+
+' Agregación (Stock: Producto -> Cantidad)
+Supermarket "1" o-- "*" Product : stock <Product, Int> >
+
+' Asociación
+Supermarket "1" -- "0..1" OpenHours : hours >
+SupermarketChain "1" o-- "*" Supermarket : listSupermarket >
+
+@enduml
+

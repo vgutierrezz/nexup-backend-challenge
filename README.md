@@ -35,6 +35,18 @@ Se aplicaron principios de Clean Architecture y Domain-Driven Design (DDD) para 
 Se incluyó un archivo `docs/diagram.puml` con el diagrama de clases del sistema. Este documento detalla la relación entre las entidades de dominio, sirviendo como guía para la implementación de la arquitectura. Puedes renderizarlo con PlantUML (extensión de VSCode o plantuml.jar).
 Se puede visualizar como imagen en [`docs/diagram.png`](docs/diagram.png).
 
+
+### 🚀 Casos de Uso (Business Logic)
+
+| Caso de Uso | Entrada                 | Salida                   | Descripción                                                |
+| :--- |:------------------------|:-------------------------|:-----------------------------------------------------------|
+| `RegisterSaleUseCase` | `productId`, `quantity` | `Double` (Total)         | Valida stock, genera ID de venta y actualiza persistencia. |
+| `GetProductSoldQuantityUseCase`| `productId`             | `Int` (Cantidad)         | Obtiene la cantidad vendida de un producto.                |
+| `GetProductRevenueUseCase` | `productId`             | `Double` (Total)  | Retorna el total de ventas generadas por un producto       |
+| `GetTotalRevenueUseCase` | `supermarketId`         | `Double` (Total)  | Retorna el total de ventas de un supermercado              |
+
+
+
 ## ✅ Notas finales
 - Este proyecto está preparado para ejecutarse y ser probado sin necesidad de una base de datos: usa estructuras en memoria para las pruebas.
 - Para expandirlo, se recomienda añadir un `build.gradle.kts`, configuración de CI y tests adicionales que cubran los casos límite (stock insuficiente, ventas concurrentes, formato de reportes).

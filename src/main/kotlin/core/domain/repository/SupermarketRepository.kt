@@ -8,4 +8,5 @@ interface SupermarketRepository {
     fun addSupermarket(supermarket: Supermarket)
     fun updateSupermarket(supermarket: Supermarket)
     fun deleteSupermarket(id: Long)
+    fun getNextSaleId(): Long
 }

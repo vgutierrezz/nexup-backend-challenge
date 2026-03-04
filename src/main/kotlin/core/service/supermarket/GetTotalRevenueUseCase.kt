@@ -1,4 +1,4 @@
-package main.kotlin.core.service
+package main.kotlin.core.service.supermarket
 
 import main.kotlin.core.domain.repository.SupermarketRepository
 import main.kotlin.infraestructure.exception.SupermarketNotFoundException

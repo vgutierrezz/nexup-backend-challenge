@@ -1,5 +1,6 @@
 package main.kotlin.core.domain.repository
 
+import main.kotlin.core.domain.models.Product
 import main.kotlin.core.domain.models.Supermarket
 
 
@@ -11,4 +12,5 @@ interface SupermarketRepository {
     fun deleteSupermarket(id: Long)
     fun getNextSaleId(): Long
     fun getSupermarketsByChainId(chainId: Long): List<Supermarket>
+    fun getProductById(productId: Long): Product?
 }

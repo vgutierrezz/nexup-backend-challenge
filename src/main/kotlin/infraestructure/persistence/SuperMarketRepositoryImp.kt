@@ -28,4 +28,7 @@ class InMemorySupermarketRepository : SupermarketRepository {
         supermarkets.remove(id)
     }
 
+    override fun getSupermarketsByChainId(chainId: Long): List<Supermarket> {
+        return supermarkets.values.filter { it.chainId == chainId }
+    }
 }

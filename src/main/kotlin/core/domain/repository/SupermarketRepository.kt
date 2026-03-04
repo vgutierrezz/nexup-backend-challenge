@@ -9,4 +9,5 @@ interface SupermarketRepository {
     fun updateSupermarket(supermarket: Supermarket)
     fun deleteSupermarket(id: Long)
     fun getNextSaleId(): Long
+    fun getSupermarketsByChainId(chainId: Long): List<Supermarket>
 }

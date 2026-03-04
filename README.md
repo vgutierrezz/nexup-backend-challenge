@@ -3,54 +3,54 @@
 Esta es mi resolución para el desafío técnico de Nexup.
 
 ## 🏗️ Arquitectura
-Se aplicaron principios de Clean Architecture y Domain-Driven Design (DDD) para garantizar el desacoplamiento y la escalabilidad del sistema:
 
-* `core/domain/models`: Contiene las entidades de negocio (Supermarket, Product, Sale, OpenHours) y las interfaces de los repositorios.
-* `core/service`: Casos de uso y lógica de dominio (por ejemplo `registerSale`).
-* `infraestructure/delivery`: DTOs y mappers para la capa de entrega.
-* `infraestructure/persistence`: Implementaciones en memoria para pruebas.
+El proyecto está organizado alrededor del dominio y una implementación de persistencia en memoria.  
+Por el momento no hay una API HTTP expuesta.
 
+- `core/domain/models`: entidades y lógica de negocio (`Supermarket`, `Product`, `Sale`, `OpenHours`, `SupermarketChain`, `SupermarketProduct`).
+- `core/domain/exception`: excepciones de dominio para validar invariantes y reglas.
+- `core/domain/repository`: contrato de repositorio (`SupermarketRepository`).
+- `infraestructure/persistence`: implementación en memoria (`SuperMarketRepositoryImp`).
+- `infraestructure/exception`: excepción de infraestructura (`SupermarketNotFoundException`).
+- `infraestructure/delivery`: `GlobalExceptionHandler` (presente, sin capa externa activa en esta versión).
+- `src/Main.kt`: punto de entrada con ejemplo de ejecución.
 
 ## 🛠️ Decisiones Técnicas
 
-* Kotlin Puro: Se decidió no utilizar Spring Boot para demostrar solidez en el lenguaje base y evitar over-engineering.
-* IDs de tipo `Long`: Se utilizaron identificadores numéricos de 64 bits para mantener consistencia con estándares de bases de datos relacionales como PostgreSQL.
-* Value Objects: La gestión de horarios (`OpenHours`) se encapsuló en un objeto de valor con su propia lógica de validación.
-* DTOs: Se implementaron Data Transfer Objects para el retorno de información, evitando exponer las entidades de dominio directamente.
-
+- **Kotlin puro** para enfocarse en dominio sin sobrecarga de framework.
+- **IDs `Long`** para mantener consistencia en entidades y referencias.
+- **Validaciones dentro del dominio** (invariantes en constructores y métodos).
+- **Persistencia en memoria** adecuada para el alcance del challenge.
 
 ## 📁 Estructura principal del proyecto
 
-- `src/Main.kt` - punto de entrada (ejemplo)
-- `src/main/kotlin/core/domain/models/` - modelos: `Product.kt`, `Sale.kt`, `Supermarket.kt`, `SupermarketChain.kt`, `OpenHours.kt`
-- `src/main/kotlin/core/service/` - lógica de negocio (p.ej. `registerSale.kt`)
-- `src/main/kotlin/infraestructure/delivery/dtos/` - DTOs: `SaleResponseDTO.kt`, `SupermarketReportDTO.kt`
-- `src/main/kotlin/infraestructure/delivery/mapper/` - mappers: `MapperExtensions.kt`
-- `test/ChallengeTests.kt` - pruebas de ejemplo
-- `docs/diagram.puml` - diagrama de clases en PlantUML
+- `src/Main.kt`
+- `src/main/kotlin/core/domain/models/`: Contiene las entidades de negocio (Supermarket, Product, Sale, OpenHours) y las interfaces de los repositorios.
+- `src/main/kotlin/core/domain/exception/`: Excepciones de dominio para validar reglas de negocio (ej, `InvalidSaleException`, `InvalidStockException`).
+- `src/main/kotlin/core/domain/repository/`: Contiene la interfaz `SupermarketRepository` que define las operaciones de persistencia necesarias para el dominio.
+- `src/main/kotlin/core/service/`: Casos de uso y lógica de dominio
+- `src/main/kotlin/infraestructure/persistence/`: Implementaciones en memoria para pruebas.
+- `src/main/kotlin/infraestructure/exception/`: Excepciones específicas de infraestructura (SupermarketNotFoundException).
+- `src/main/kotlin/infraestructure/delivery/`: Manejo de excepciones global (presente, sin capa externa activa).
+- `test/ChallengeTests.kt`
+- `docs`: Documentación visual y diagramas de clases.
 
+## 📊 Documentación visual
 
-## 📊 Documentación Visual
+- `docs/diagram.puml`: diagrama de clases del dominio actualizado.
+- `docs/classDiagram.png`: versión en imagen del diagrama.
 
-Se incluyó un archivo `docs/diagram.puml` con el diagrama de clases del sistema. Este documento detalla la relación entre las entidades de dominio, sirviendo como guía para la implementación de la arquitectura. Puedes renderizarlo con PlantUML (extensión de VSCode o plantuml.jar).
-Se puede visualizar como imagen en [`docs/diagram.png`](docs/diagram.png).
+## Alcance funcional actual
 
+La lógica principal se centra en:
 
-### 🚀 Casos de Uso (Business Logic)
-
-| Caso de Uso | Entrada                 | Salida                   | Descripción                                                |
-| :--- |:------------------------|:-------------------------|:-----------------------------------------------------------|
-| `RegisterSaleUseCase` | `productId`, `quantity` | `Double` (Total)         | Valida stock, genera ID de venta y actualiza persistencia. |
-| `GetProductSoldQuantityUseCase`| `productId`             | `Int` (Cantidad)         | Obtiene la cantidad vendida de un producto.                |
-| `GetProductRevenueUseCase` | `productId`             | `Double` (Total)  | Retorna el total de ventas generadas por un producto       |
-| `GetTotalRevenueUseCase` | `supermarketId`         | `Double` (Total)  | Retorna el total de ventas de un supermercado              |
-
-
+- gestión de supermercados y cadenas;
+- gestión de productos por supermercado con control de stock (`SupermarketProduct`);
+- registro de ventas (`Sale`) con validaciones de cantidad y precio;
+- validaciones de horarios de apertura (`OpenHours`);
+- manejo de errores mediante excepciones de dominio específicas.
 
 ## ✅ Notas finales
-- Este proyecto está preparado para ejecutarse y ser probado sin necesidad de una base de datos: usa estructuras en memoria para las pruebas.
-- Para expandirlo, se recomienda añadir un `build.gradle.kts`, configuración de CI y tests adicionales que cubran los casos límite (stock insuficiente, ventas concurrentes, formato de reportes).
 
-
----
-Actualizado para reflejar la estructura del proyecto en `src/main/kotlin` y los paquetes actuales.
+- No se usan DTOs ni mappers en la implementación actual, porque no hay una capa externa.
+- La persistencia es en memoria y está orientada al challenge.

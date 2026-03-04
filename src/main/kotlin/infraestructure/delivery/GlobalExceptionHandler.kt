@@ -1,26 +1,26 @@
 package main.kotlin.infraestructure.delivery
 
-import main.kotlin.core.domain.exception.SupermarketException
-import java.time.LocalDateTime
-import javax.swing.Action
+import main.kotlin.core.domain.exception.DomainException
+import main.kotlin.infraestructure.exception.SupermarketNotFoundException
 
-class GlobalExceptionHandler {
-    fun <T> handle(action: () -> T): T? {
-        return try {
-            action()
-        } catch (e: SupermarketException) {
-            // Errores conocidos de lógica de negocio
-            logError("BUSINESS_ERROR", e.message ?: "Error de negocio desconocido")
-            null
+object ExceptionHandler {
+
+    fun <T> handle(action: () -> T): Result<T> =
+        try {
+            Result.success(action())
+        } catch (e: DomainException) {
+            logError("DOMAIN_ERROR", e)
+            Result.failure(e)
+        } catch (e: SupermarketNotFoundException) {
+            logError("APPLICATION_ERROR", e)
+            Result.failure(e)
         } catch (e: Exception) {
-            // Errores inesperados (NullPointer, etc.)
-            logError("INTERNAL_ERROR", "Ocurrió un error inesperado: ${e.message}")
-            null
+            logError("INTERNAL_ERROR", e)
+            Result.failure(e)
         }
-    }
 
-    private fun logError(type: String, message: String) {
-        val timestamp = LocalDateTime.now()
-        println("[$timestamp] [$type]: $message")
+    private fun logError(type: String, e: Throwable) {
+        val timestamp = java.time.LocalDateTime.now()
+        println("[$timestamp] [$type]: ${e.message ?: "Sin mensaje"}")
     }
 }

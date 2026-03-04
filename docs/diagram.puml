@@ -1,58 +1,78 @@
 @startuml
-' Diagrama de clases - Nexup Backend Challenge
-' Basado en el código Kotlin actual del proyecto
+title Nexup Backend Challenge - Domain Model (Refinado)
 
 skinparam classAttributeIconSize 0
+hide empty members
 
-' ========== DOMAIN MODELS ==========
 package "Domain::Models" {
 
-  class Product <<dataclass>> {
-    + id: Long
-    + name: String
-    + price: Double
+  class Product {
+    +id: Long
+    +name: String
+    +price: BigDecimal
   }
 
-  class Sale <<dataclass>> {
-    + id: Long
-    + productId: Long
-    + quantity: Int
-    + supermarketId: Long
-    + totalPrice: Double
-    + timestamp: LocalDate (default: LocalDate.now())
+  class OpenHours {
+    +daysOpen: Set<DayOfWeek>
+    +openTime: LocalTime
+    +closeTime: LocalTime
+    +isOpen(day: DayOfWeek, time: LocalTime): Boolean
   }
 
-  class OpenHours <<dataclass>> {
-    + daysOpen: Set<DayOfWeek>
-    + openTime: LocalTime
-    + closeTime: LocalTime
+  class Sale {
+    +id: Long
+    +productId: Long
+    +quantity: Int
+    +unitPrice: BigDecimal
+    +timestamp: LocalDate
+    +totalPrice: BigDecimal <<derived>>
   }
 
-  class Supermarket <<dataclass>> {
-    + id: Long
-    + name: String
-    + stock: MutableMap<Product, Int>
-    + sales: MutableList<Sale>
-    + hours: OpenHours? (nullable)
+  class SupermarketProduct {
+    +productId: Long
+    -stock: Int
+    +increaseStock(quantity: Int): Unit
+    +decreaseStock(quantity: Int): Unit
+    +hasStock(quantity: Int): Boolean
+    +currentStock(): Int
   }
 
-  class SupermarketChain <<dataclass>> {
-    + id: Long
-    + listSupermarket: List<Supermarket>
+  class Supermarket {
+    +id: Long
+    +name: String
+    +chainId: Long
+    -products: MutableList<SupermarketProduct>
+    -sales: MutableList<Sale>
+    +hours: OpenHours?
+    --
+    +getProducts(): List<SupermarketProduct>
+    +getSales(): List<Sale>
+    +addProduct(productId: Long, initialStock: Int): Unit
+    +increaseStock(productId: Long, quantity: Int): Unit
+    +sellProduct(productId: Long, quantity: Int, unitPrice: BigDecimal): Sale
+    -findProduct(productId: Long): SupermarketProduct
+  }
+
+  class SupermarketChain {
+    +id: Long
+    +name: String
   }
 }
 
-' ========== RELACIONES ==========
 
-' Composición
-Supermarket "1" *-- "*" Sale : contiene sales >
 
-' Agregación (Stock: Producto -> Cantidad)
-Supermarket "1" o-- "*" Product : stock <Product, Int> >
+' =========================
+' Relaciones de dominio
+' =========================
 
-' Asociación
-Supermarket "1" -- "0..1" OpenHours : hours >
-SupermarketChain "1" o-- "*" Supermarket : listSupermarket >
+Supermarket "1" *-- "0..*" SupermarketProduct : products
+Supermarket "1" *-- "0..*" Sale : sales
+Supermarket "1" -- "0..1" OpenHours : hours
+
+SupermarketChain "1" -- "0..*" Supermarket : chainId (logical)
+
+SupermarketProduct --> Product : productId
+Sale --> Product : productId
+
 
 @enduml
-

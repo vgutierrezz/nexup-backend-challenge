@@ -1,6 +1,15 @@
 package com.nexup.challenge.domain.models
 
-data class SupermarketChain (
+import main.kotlin.core.domain.exception.InvalidNameException
+
+class SupermarketChain (
     val id: Long,
-    val listSupermarket: List<Supermarket>
-)
+    val name: String
+) {
+    //Validaciones
+    init {
+        if (name.isBlank()) {
+            throw InvalidNameException()
+        }
+    }
+}

@@ -1,10 +1,11 @@
 package main.kotlin.infraestructure.persistence
 
-import com.nexup.challenge.domain.models.Supermarket
+
+import main.kotlin.core.domain.models.Supermarket
 import main.kotlin.core.domain.repository.SupermarketRepository
 import java.util.concurrent.atomic.AtomicLong
 
-class InMemorySupermarketRepository : SupermarketRepository {
+class SuperMarketRepositoryImp : SupermarketRepository {
     private val supermarkets = mutableMapOf<Long, Supermarket>()
 
     // Contador global para las ventas de todos los supermercados

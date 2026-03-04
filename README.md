@@ -40,13 +40,26 @@ Por el momento no hay una API HTTP expuesta.
 - `docs/diagram.puml`: diagrama de clases del dominio actualizado.
 - `docs/classDiagram.png`: versión en imagen del diagrama.
 
-## Alcance funcional actual
+## 🎯 Casos de Uso
+
+Cada caso de uso está orientado a operaciones específicas de un supermercado individual (reciben `supermarketId` en la construcción):
+
+| Caso de Uso | Descripción | Entrada | Salida | Lógica / Validaciones | Excepciones |
+|-------------|-------------|---------|--------|----------------------|-------------|
+| **`RegisterSaleUserCase`** | Registrar una venta de un producto en el supermercado especificado | `productId: Long`<br>`quantity: Int` | `BigDecimal`<br>(precio total de la venta) | • Verifica que el supermercado exista<br>• Verifica que el producto exista<br>• Valida stock disponible<br>• Actualiza el stock<br>• Registra la venta en el historial | `SupermarketNotFoundException`<br>`ProductNotFoundException`<br>`InsufficientStockException` |
+| **`GetProductRevenueUseCase`** | Obtener ingresos totales por ventas de un producto específico | `productId: Long` | `BigDecimal`<br>(ingresos totales del producto) | Suma el `totalPrice` de todas las ventas del producto en el supermercado | `SupermarketNotFoundException` |
+| **`GetProductSoldQuantityUseCase`** | Obtener la cantidad total vendida de un producto | `productId: Long` | `Int`<br>(unidades vendidas) | Delega en `Supermarket.getSoldQuantity()` que suma las cantidades de todas las ventas del producto | `SupermarketNotFoundException` |
+| **`GetTotalRevenueUseCase`** | Obtener ingresos totales acumulados del supermercado | _ninguna_<br>(usa `supermarketId` configurado) | `BigDecimal`<br>(ingresos totales) | Suma el `totalPrice` de todas las ventas en el historial del supermercado | `SupermarketNotFoundException` |
+
+## 📦 Alcance funcional actual
 
 La lógica principal se centra en:
 
 - gestión de supermercados y cadenas;
 - gestión de productos por supermercado con control de stock (`SupermarketProduct`);
 - registro de ventas (`Sale`) con validaciones de cantidad y precio;
+- consultas de ingresos y cantidades vendidas por producto;
+- consultas de ingresos totales por supermercado;
 - validaciones de horarios de apertura (`OpenHours`);
 - manejo de errores mediante excepciones de dominio específicas.
 

@@ -1,6 +1,7 @@
 package main.kotlin.core.domain.repository
 
-import com.nexup.challenge.domain.models.Supermarket
+import main.kotlin.core.domain.models.Supermarket
+
 
 interface SupermarketRepository {
     fun getAllSupermarkets(): List<Supermarket>

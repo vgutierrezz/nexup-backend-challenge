@@ -15,7 +15,7 @@ import java.math.BigDecimal
  * @property supermarketId Identificador del local donde se realiza la operación.
  */
 
-class RegisterSaleUserCase (
+class RegisterSaleUseCase (
     private val repository: SupermarketRepository,
     private val productRepository: ProductRepository,
     private val supermarketId: Long

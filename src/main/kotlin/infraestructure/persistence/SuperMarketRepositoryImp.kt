@@ -1,8 +1,10 @@
 package main.kotlin.infraestructure.persistence
 
 
+import main.kotlin.core.domain.models.Product
 import main.kotlin.core.domain.models.Supermarket
 import main.kotlin.core.domain.repository.SupermarketRepository
+import java.math.BigDecimal
 import java.util.concurrent.atomic.AtomicLong
 
 class SuperMarketRepositoryImp : SupermarketRepository {
@@ -31,5 +33,19 @@ class SuperMarketRepositoryImp : SupermarketRepository {
 
     override fun getSupermarketsByChainId(chainId: Long): List<Supermarket> {
         return supermarkets.values.filter { it.chainId == chainId }
+    }
+
+    override fun getProductById(productId: Long): Product? {
+        for (supermarket in supermarkets.values) {
+            val sp = supermarket.getProducts().find { it.productId == productId }
+            if (sp != null) {
+                return Product(
+                    id = sp.productId,
+                    name = "Nombre desconocido", // o nombre real de un catálogo
+                    price = BigDecimal.ZERO      // o precio real si lo tenés
+                )
+            }
+        }
+        return null
     }
 }

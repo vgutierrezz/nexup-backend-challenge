@@ -1,5 +1,5 @@
 @startuml
-title Nexup Backend Challenge - Domain Model (Refinado)
+title Nexup Backend Challenge - Domain Model
 
 skinparam classAttributeIconSize 0
 hide empty members
@@ -10,12 +10,16 @@ package "Domain::Models" {
     +id: Long
     +name: String
     +price: BigDecimal
+    --
+    {validation} name is not blank
+    {validation} price >= 0
   }
 
   class OpenHours {
     +daysOpen: Set<DayOfWeek>
     +openTime: LocalTime
     +closeTime: LocalTime
+    --
     +isOpen(day: DayOfWeek, time: LocalTime): Boolean
   }
 
@@ -23,18 +27,24 @@ package "Domain::Models" {
     +id: Long
     +productId: Long
     +quantity: Int
+    +supermarketId: Long
     +unitPrice: BigDecimal
-    +timestamp: LocalDate
-    +totalPrice: BigDecimal <<derived>>
+    +timestamp: LocalDate = LocalDate.now()
+    --
+    +totalPrice: BigDecimal <<derived>> (unitPrice * quantity)
+    {validation} quantity > 0
+    {validation} unitPrice >= 0
   }
 
   class SupermarketProduct {
     +productId: Long
     -stock: Int
+    --
     +increaseStock(quantity: Int): Unit
     +decreaseStock(quantity: Int): Unit
     +hasStock(quantity: Int): Boolean
     +currentStock(): Int
+    {validation} stock >= 0
   }
 
   class Supermarket {
@@ -49,8 +59,10 @@ package "Domain::Models" {
     +getSales(): List<Sale>
     +addProduct(productId: Long, initialStock: Int): Unit
     +increaseStock(productId: Long, quantity: Int): Unit
-    +sellProduct(productId: Long, quantity: Int, unitPrice: BigDecimal): Sale
+    +sellProduct(product: Product, quantity: Int, saleId: Long): BigDecimal
+    +getSoldQuantity(productId: Long): Int
     -findProduct(productId: Long): SupermarketProduct
+    {validation} name is not blank
   }
 
   class SupermarketChain {
@@ -59,20 +71,62 @@ package "Domain::Models" {
   }
 }
 
+package "Domain::Exceptions" {
+  class DomainException
+  class InvalidNameException
+  class InvalidProductNameException
+  class InvalidPriceException
+  class InvalidQuantityException
+  class InsufficientStockException
+  class ProductAlreadyExistsException
+  class ProductNotFoundException
+  class InvalidOpenTimeRangeException
+  class InvalidOpenDaysException
+}
 
+package "Domain::Repositories" {
+  interface SupermarketRepository {
+    +getSupermarketById(id: Long): Supermarket?
+    +updateSupermarket(supermarket: Supermarket): Unit
+    +getAllSupermarkets(): List<Supermarket>
+    +addSupermarket(supermarket: Supermarket): Unit
+    +deleteSupermarket(id: Long): Unit
+    +getSupermarketsByChainId(chainId: Long): List<Supermarket>
+    +getNextSaleId(): Long
+  }
+
+  interface ProductRepository {
+    +getById(id: Long): Product?
+    +save(product: Product): Unit
+    +getAll(): List<Product>
+  }
+}
 
 ' =========================
 ' Relaciones de dominio
 ' =========================
 
-Supermarket "1" *-- "0..*" SupermarketProduct : products
-Supermarket "1" *-- "0..*" Sale : sales
-Supermarket "1" -- "0..1" OpenHours : hours
+Supermarket "1" *-- "0..*" SupermarketProduct : contains
+Supermarket "1" *-- "0..*" Sale : registers
+Supermarket "1" -- "0..1" OpenHours : has
 
-SupermarketChain "1" -- "0..*" Supermarket : chainId (logical)
+SupermarketChain "1" -- "0..*" Supermarket : operates
 
-SupermarketProduct --> Product : productId
-Sale --> Product : productId
+SupermarketProduct --> Product : references (by productId)
+Sale --> Product : references (by productId)
+
+DomainException <|-- InvalidNameException
+DomainException <|-- InvalidProductNameException
+DomainException <|-- InvalidPriceException
+DomainException <|-- InvalidQuantityException
+DomainException <|-- InsufficientStockException
+DomainException <|-- ProductAlreadyExistsException
+DomainException <|-- ProductNotFoundException
+DomainException <|-- InvalidOpenTimeRangeException
+DomainException <|-- InvalidOpenDaysException
+
+Supermarket ..> SupermarketRepository : uses
+Supermarket ..> ProductRepository : uses
 
 
 @enduml

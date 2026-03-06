@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Información del proyecto -->
+    <groupId>com.nexup.challenge</groupId>
+    <artifactId>nexup-backend-challenge</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Nexup Backend Challenge</name>
+    <description>Solución del desafío técnico de Nexup - Gestión de Supermercados y Cadenas</description>
+    <url>https://github.com/gutierrezsilva/nexup-backend-challenge</url>
+
+    <!-- Propiedades globales -->
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Versiones de dependencias -->
+        <kotlin.version>1.9.0</kotlin.version>
+        <junit.version>5.9.2</junit.version>
+        <mockito.version>5.2.0</mockito.version>
+        <mockito-kotlin.version>5.1.0</mockito-kotlin.version>
+        <jacoco.version>0.8.10</jacoco.version>
+        <maven.surefire.version>3.0.0-M9</maven.surefire.version>
+        <maven.compiler.version>3.11.0</maven.compiler.version>
+    </properties>
+
+    <!-- DEPENDENCIAS -->
+    <dependencies>
+        <!-- ============ CORE ============ -->
+        <!-- Kotlin Standard Library -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+
+        <!-- ============ TEST FRAMEWORK ============ -->
+        <!-- JUnit 5 - Framework de testing moderno -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JUnit 5 - Pruebas parametrizadas -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ============ MOCKING ============ -->
+        <!-- Mockito - Framework para crear mocks en tests -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Mockito Kotlin - DSL para Mockito con Kotlin -->
+        <dependency>
+            <groupId>org.mockito.kotlin</groupId>
+            <artifactId>mockito-kotlin</artifactId>
+            <version>${mockito-kotlin.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- CONFIGURACIÓN DE BUILD -->
+    <build>
+        <!-- ============ PLUGINS ============ -->
+        <plugins>
+            <!-- Kotlin Maven Plugin - Compilación de código Kotlin -->
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <!-- Compilación de código fuente -->
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <!-- Compilación de tests -->
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven Compiler Plugin - Compilación de código Java -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.version}</version>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+
+            <!-- Maven Surefire Plugin - Ejecución de tests unitarios -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
+                <configuration>
+                    <!-- Busca archivos de test que coincidan con el patrón -->
+                    <includes>
+                        <include>**/*Test.kt</include>
+                        <include>**/*Tests.kt</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <!-- JaCoCo Plugin - Cobertura de código -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <!-- Preparar agente para recolectar datos de cobertura -->
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <!-- Generar reporte de cobertura después de tests -->
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <!-- ============ DIRECTORIOS FUENTE ============ -->
+        <!-- Ubicación del código fuente Kotlin -->
+        <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <!-- Ubicación de los tests -->
+        <testSourceDirectory>src/test</testSourceDirectory>
+    </build>
+</project>
+

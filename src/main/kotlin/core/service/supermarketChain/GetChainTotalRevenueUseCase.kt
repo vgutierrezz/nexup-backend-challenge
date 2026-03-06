@@ -1,4 +1,4 @@
-package main.kotlin.core.supermarketChain
+package main.kotlin.core.service.supermarketChain
 
 import main.kotlin.core.domain.repository.SupermarketRepository
 import java.math.BigDecimal

@@ -69,6 +69,29 @@ SupermarketChain (1) ──┐
 | **`GetSupermarketHighestRevenueUseCase`** | Supermercado con mayores ingresos | _(ninguna)_ | `String` (Formateado) |
 | **`GetTop5ProductsUseCase`** | Top 5 productos más vendidos en la cadena | `topN: Int` (opcional) | `String` (Formateado) |
 
+## ⚠️ Excepciones Personalizadas
+
+El proyecto define excepciones específicas del dominio para manejar errores de negocio de manera clara y controlada.
+
+### Excepciones Disponibles
+
+ Excepción | Ubicación | Descripción | Cuándo se lanza |
+|-----------|-----------|-------------|-----------------|
+| **`DomainException`** | `domain/exception` | Excepción base del dominio | Base para todas las excepciones de negocio |
+| **`InsufficientStockException`** | `domain/exception` | Stock insuficiente para completar la venta | Cuando `quantity > stock disponible` |
+| **`InvalidNameException`** | `domain/exception` | Nombre inválido (vacío o nulo) | En la creación de entidades con nombre |
+| **`InvalidOpenDaysException`** | `domain/exception` | Días de apertura inválidos | En `OpenHours` con días vacíos |
+| **`InvalidOpenTimeRangeException`** | `domain/exception` | Rango de horas inválido | Cuando hora final ≤ hora inicial en `OpenHours` |
+| **`InvalidPriceException`** | `domain/exception` | Precio inválido (negativo o cero) | En la creación de `Product` |
+| **`InvalidProductNameException`** | `domain/exception` | Nombre de producto inválido | En la creación de `Product` |
+| **`InvalidQuantityException`** | `domain/exception` | Cantidad inválida (≤ 0) | En la creación de `Sale` |
+| **`ProductAlreadyExistsException`** | `domain/exception` | Producto ya existe en el supermercado | Al intentar agregar un producto duplicado |
+| **`ProductNotFoundException`** | `domain/exception` | Producto no encontrado | Cuando se intenta vender un producto inexistente |
+| **`SupermarketNotFoundException`** | `infrastructure/exception` | Supermercado no encontrado en la cadena | Cuando se intenta acceder a un supermercado inexistente |
+
+
+
+
 ## 🧪 Testing
 
 He dividido la suite de pruebas para asegurar la calidad en distintos niveles:

@@ -1,159 +1,151 @@
-# Nexup Backend Challenge - Solución
+# Nexup Backend Challenge - Solución 🚀
 
-Esta es mi resolución para el desafío técnico de Nexup.
+Esta es mi resolución para el desafío técnico de Nexup, enfocada en **Clean Architecture** y **DDD**.
 
 ## 🏗️ Arquitectura
 
-El proyecto está organizado alrededor del **dominio** y una implementación de **persistencia en memoria**. No hay una capa HTTP externa expuesta en esta versión.
+El proyecto sigue una estructura de capas para mantener el dominio aislado de la infraestructura.
 
 ### Estructura de carpetas:
+- **`core/domain/models`**: Entidades con lógica propia (`Supermarket`, `Sale`, `SupermarketChain`).
+- **`core/domain/repository`**: Interfaces que definen el contrato de persistencia.
+- **`core/service`**: Casos de Uso (Use Cases) que orquestan la lógica de negocio.
+- **`infraestructure/persistence`**: Implementación en memoria con **Data Seeding** inicial.
+- **`infraestructure/delivery`**: Manejo global de excepciones.
 
-- **`core/domain/models`**: Entidades de negocio (`Supermarket`, `Product`, `Sale`, `OpenHours`, `SupermarketChain`, `SupermarketProduct`)
-- **`core/domain/exception`**: Excepciones de dominio para validar invariantes y reglas de negocio
-- **`core/domain/repository`**: Contratos de repositorios (`SupermarketRepository`, `ProductRepository`)
-- **`core/service`**: Casos de uso/Use cases (cada uno específico para un supermercado)
-- **`infraestructure/persistence`**: Implementaciones en memoria de los repositorios
-- **`infraestructure/exception`**: Excepciones específicas de infraestructura (`SupermarketNotFoundException`)
-- **`infraestructure/delivery`**: `GlobalExceptionHandler` para manejo de excepciones (presente pero no activa en versión actual)
+
 
 ## 🛠️ Decisiones Técnicas
+- **Kotlin Idiomático**: Uso de `sumOf`, `flatMap`, `groupBy` y `joinToString` para procesamiento de datos eficiente.
+- **Single Responsibility**: Cada reporte e interacción tiene su propio Use Case.
+- **KDoc**: Documentación técnica integrada directamente en los métodos principales.
+- **Data Seeding**: El repositorio inicia con una cadena y locales precargados para facilitar las pruebas.
 
-- **Kotlin puro** para enfocarse en el dominio sin sobrecarga de frameworks
-- **IDs `Long`** para mantener consistencia en entidades y referencias
-- **Validaciones dentro del dominio** (invariantes en constructores y métodos)
-- **Persistencia en memoria** adecuada para el alcance del challenge
-- **Sin DTOs ni mappers** - Los modelos de dominio se usan directamente
-- **Casos de uso parametrizados por `supermarketId`** para operaciones específicas de cada local
-
-## 📁 Estructura principal del proyecto
+## 📋 Relaciones de Clases del Dominio
 
 ```
-src/
-├── main/
-│   └── kotlin/
-│       └── core/
-│           ├── domain/
-│           │   ├── models/: Entidades de negocio
-│           │   ├── exception/: Excepciones de dominio
-│           │   └── repository/: Interfaces de persistencia
-│           ├── service/supermarket/: Casos de uso por supermercado
-│           └── service/supermarketChain/: Casos de uso por cadena
-└── infraestructure/
-    ├── persistence/: Implementaciones en memoria
-    ├── exception/: Excepciones de infraestructura
-    └── delivery/: Manejo global de excepciones
+SupermarketChain (1) ──┐
+                       │
+                       ├─→ Supermarket (1..*)
+                            ├─→ SupermarketProduct (1..*)
+                            │    └─→ Product (referencia por ID)
+                            │
+                            ├─→ Sale (1..*)
+                            │    └─→ Product (referencia por productId)
+                            │
+                            └─→ OpenHours (0..1) [Value Object]
 ```
 
-## 📊 Casos de Uso (Use Cases)
+### Descripciones de Clases
 
-Cada caso de uso está orientado a operaciones específicas de un **supermercado individual** (reciben `supermarketId` en la construcción):
+- **`Product`**: Catálogo central de productos (id, name, price)
+- **`SupermarketProduct`**: Vinculación entre Product y Supermarket con control de stock
+- **`Sale`**: Registro inmutable de transacciones (qué se vendió, cuándo, a qué precio)
+- **`Supermarket`** (Raíz de Agregado): Gestiona productos y ventas del local
+- **`OpenHours`** (Value Object): Encapsula lógica de horarios de atención
+- **`SupermarketChain`**: Agrupa múltiples supermercados
 
-| Caso de Uso | Descripción | Entrada | Salida | Lógica / Validaciones | Excepciones |
-|-------------|-------------|---------|--------|----------------------|-------------|
-| **`RegisterSaleUserCase`** | Registrar una venta de un producto en el supermercado | `productId: Long`<br>`quantity: Int` | `BigDecimal`<br>(precio total de la venta) | • Verifica que el supermercado exista<br>• Verifica que el producto exista en el local<br>• Valida stock disponible<br>• Actualiza el stock<br>• Registra la venta en el historial<br>• Retorna el monto total | `SupermarketNotFoundException`<br>`ProductNotFoundException`<br>`InsufficientStockException` |
-| **`GetProductRevenueUseCase`** | Obtener ingresos totales por ventas de un producto específico | `productId: Long` | `BigDecimal`<br>(ingresos totales del producto) | • Obtiene el supermercado<br>• Suma el `totalPrice` de todas las ventas del producto | `SupermarketNotFoundException` |
-| **`GetProductSoldQuantityUseCase`** | Obtener la cantidad total vendida de un producto | `productId: Long` | `Int`<br>(unidades vendidas) | • Obtiene el supermercado<br>• Suma las cantidades de todas las ventas del producto | `SupermarketNotFoundException` |
-| **`GetTotalRevenueUseCase`** | Obtener ingresos totales acumulados del supermercado | _(ninguna)_ | `BigDecimal`<br>(ingresos totales) | • Suma el `totalPrice` de todas las ventas en el historial del local | `SupermarketNotFoundException` |
+### Patrones Aplicados
+- **Agregados**: `Supermarket` es raíz de agregado, contiene `SupermarketProduct`, `Sale` y `OpenHours`
+- **Value Objects**: `OpenHours` no tiene identidad propia, se embebe en `Supermarket`
+- **Referencias por ID**: `Sale` y `SupermarketProduct` referencian `Product` por ID, no por objeto completo
 
-## 📦 Entidades del Dominio
+## 📊 Casos de Uso Principales
 
-### Product
-- `id: Long` - Identificador único
-- `name: String` - Nombre del producto (no puede estar vacío)
-- `price: BigDecimal` - Precio unitario (debe ser >= 0)
+### Por Supermercado Individual
 
-### Sale
-- `id: Long` - Identificador único de la venta
-- `productId: Long` - Referencia al producto
-- `quantity: Int` - Cantidad vendida (debe ser > 0)
-- `supermarketId: Long` - ID del supermercado donde se realiza la venta
-- `unitPrice: BigDecimal` - Precio unitario al momento de la venta
-- `timestamp: LocalDate` - Fecha de la venta
-- `totalPrice: BigDecimal` - Propiedad derivada (unitPrice * quantity)
+| Caso de Uso | Descripción | Entrada | Salida |
+|-------------|-------------|---------|--------|
+| **`RegisterSaleUseCase`** | Registra venta y descuenta stock | `productId: Long`<br>`quantity: Int` | `BigDecimal` (Total venta) |
+| **`GetProductRevenueUseCase`** | Ingresos totales de un producto en el local | `productId: Long` | `BigDecimal` |
+| **`GetProductSoldQuantityUseCase`** | Cantidad total vendida de un producto | `productId: Long` | `Int` |
+| **`GetTotalRevenueUseCase`** | Ingresos totales acumulados del local | _(ninguna)_ | `BigDecimal` |
 
-### SupermarketProduct
-- `productId: Long` - Referencia al producto
-- `stock: Int` - Stock disponible (privado, acceso controlado)
-- Métodos: `increaseStock()`, `decreaseStock()`, `hasStock()`, `currentStock()`
+### Por Cadena de Supermercados
 
-### Supermarket
-- `id: Long` - Identificador único
-- `name: String` - Nombre del supermercado (no puede estar vacío)
-- `chainId: Long` - ID de la cadena a la que pertenece
-- `products: MutableList<SupermarketProduct>` - Productos disponibles (privado)
-- `sales: MutableList<Sale>` - Historial de ventas (privado)
-- `hours: OpenHours?` - Horario de atención (opcional)
-
-### OpenHours
-- `daysOpen: Set<DayOfWeek>` - Días de operación
-- `openTime: LocalTime` - Hora de apertura
-- `closeTime: LocalTime` - Hora de cierre
-- Método: `isOpen(day, time): Boolean`
-
-### SupermarketChain
-- `id: Long` - Identificador único
-- `name: String` - Nombre de la cadena
-
-## ✅ Alcance funcional actual
-
-La lógica principal se centra en:
-
-- Gestión de supermercados y cadenas
-- Gestión de productos por supermercado con control de stock (`SupermarketProduct`)
-- Registro de ventas (`Sale`) con validaciones de cantidad y precio
-- Consultas de ingresos y cantidades vendidas por producto
-- Consultas de ingresos totales por supermercado
-- Validaciones de horarios de apertura (`OpenHours`)
-- Manejo de errores mediante excepciones de dominio específicas
+| Caso de Uso | Descripción | Entrada | Salida |
+|-------------|-------------|---------|--------|
+| **`GetChainTotalRevenueUseCase`** | Ingresos totales de toda la cadena | _(ninguna)_ | `BigDecimal` |
+| **`GetSupermarketHighestRevenueUseCase`** | Supermercado con mayores ingresos | _(ninguna)_ | `String` (Formateado) |
+| **`GetTop5ProductsUseCase`** | Top 5 productos más vendidos en la cadena | `topN: Int` (opcional) | `String` (Formateado) |
 
 ## 🧪 Testing
 
-El proyecto incluye:
+He dividido la suite de pruebas para asegurar la calidad en distintos niveles:
 
-- **Tests unitarios** para cada entidad del dominio (usando JUnit 5)
-- **Tests de integración** para los casos de uso (cobertura de escenarios completos)
-- Cobertura de casos de éxito y excepciones esperadas
-- Validación de independencia entre supermercados
+- **Tests Unitarios**: Validación de lógica de negocio y excepciones (ej: `InsufficientStockException`).
+- **Tests de Integración**: Flujos completos desde el Use Case hasta el repositorio en memoria.
 
-### Ejecutar tests:
+### Cómo ejecutar los tests
 
+**Ejecutar todos los tests:**
 ```bash
 mvn test
 ```
 
-### Ejecutar tests específicos:
-
+**Ejecutar tests específicos:**
 ```bash
-# Tests unitarios
-mvn test -Dtest=SupermarketTest
+# Tests unitarios de Product
 mvn test -Dtest=ProductTest
-mvn test -Dtest=SaleTest
 
-# Tests de integración
-mvn test -Dtest=SupermarketUseCasesIntegrationTest
+# Tests unitarios de Supermarket
+mvn test -Dtest=SupermarketTest
+
+# Tests de integración de casos de uso
+mvn test -Dtest=SupermarketBusinessRulesIntegrationTest
+
+# Tests de integración de cadena
+mvn test -Dtest=SupermarketChainIntegrationTest
 ```
 
-## 📋 Excepciones de Dominio
+### Tests Disponibles
 
-- `InvalidNameException` - Nombre vacío en entidades
-- `InvalidProductNameException` - Nombre vacío de producto
-- `InvalidPriceException` - Precio negativo
-- `InvalidQuantityException` - Cantidad <= 0 o stock negativo
-- `InsufficientStockException` - Intento de venta con stock insuficiente
-- `ProductAlreadyExistsException` - Intento de añadir producto duplicado
-- `ProductNotFoundException` - Producto no existe en el supermercado
-- `InvalidOpenTimeRangeException` - Horario de cierre anterior a apertura
-- `InvalidOpenDaysException` - Configuración inválida de días de operación
+#### Tests Unitarios (`src/test/unit/`)
 
-## ✅ Notas finales
+1. **`ProductTest`** - Entidad Product
+   - Creación con datos válidos
+   - Validación de nombre (no vacío)
+   - Validación de precio (no negativo)
 
-- No se utilizan DTOs ni mappers en la implementación actual porque no hay una capa externa
-- La persistencia es en memoria y está optimizada para el challenge
-- Los tests cubren tanto casos de éxito como de error
-- El código sigue principios de Clean Code y Domain-Driven Design
+2. **`OpenHoursTest`** - Value Object OpenHours
+   - Creación con datos válidos
+   - Validación de días (no vacío)
+   - Validación de rango de horas
+   - Método `isOpen()` con casos válidos e inválidos
 
-## 📚 Documentación visual
+3. **`SaleTest`** - Entidad Sale
+   - Creación con datos válidos
+   - Cálculo de `totalPrice` (unitPrice * quantity)
+   - Validación de cantidad (> 0)
 
-- `docs/diagram.puml`: Diagrama de clases del dominio con relaciones y validaciones
-- `docs/classDiagram.png`: Versión en imagen del diagrama
+4. **`SupermarketProductTest`** - Control de Stock
+   - Aumento y disminución de stock
+   - Validación de stock disponible
+   - Excepciones de stock insuficiente
 
+5. **`SupermarketTest`** - Raíz de Agregado
+   - Creación con datos válidos
+   - Gestión de productos
+   - Registro de ventas
+   - Consultas de horarios
+
+6. **`SupermarketChainTest`** - Entidad SupermarketChain
+   - Creación con datos válidos
+   - Validación de nombre
+
+#### Tests de Integración (`src/test/integration/`)
+
+1. **`SupermarketBusinessRulesIntegrationTest`** - Casos de uso por supermercado
+   - `ProductManagementTests`: Agregar productos, validaciones
+   - `SalesTrackingTests`: Registrar ventas, historial
+   - `StockLimitTests`: Control de stock
+   - `RevenueCalculationTests`: Cálculo de ingresos
+   - `OpenHoursIntegrationTests`: Horarios de atención
+   - `ComplexBusinessScenariosTests`: Escenarios complejos
+
+2. **`SupermarketChainIntegrationTest`** - Casos de uso por cadena
+   - `GetChainTotalRevenueUseCaseTests`: Ingresos totales de la cadena
+   - `GetSupermarketHighestRevenueUseCaseTests`: Supermercado con mayor ingreso
+   - `GetTop5ProductsUseCaseTests`: Top 5 productos más vendidos
+   - `CrossSupermarketOperationsTests`: Operaciones entre supermercados
+   - `ChainAnalyticsTests`: Análisis de cadena

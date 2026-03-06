@@ -26,4 +26,23 @@ class OpenHours (
                 time >= openTime &&
                 time < closeTime
     }
+
+    fun getDescription(): String {
+        val dayNames = mapOf(
+            DayOfWeek.MONDAY to "Lun",
+            DayOfWeek.TUESDAY to "Mar",
+            DayOfWeek.WEDNESDAY to "Mié",
+            DayOfWeek.THURSDAY to "Jue",
+            DayOfWeek.FRIDAY to "Vie",
+            DayOfWeek.SATURDAY to "Sáb",
+            DayOfWeek.SUNDAY to "Dom"
+        )
+
+        val daysStr = daysOpen
+            .sortedBy { it.value }
+            .mapNotNull { dayNames[it] }
+            .joinToString(", ")
+
+        return "$daysStr: $openTime - $closeTime"
+    }
 }

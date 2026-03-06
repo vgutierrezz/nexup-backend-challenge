@@ -3,7 +3,7 @@ package main.kotlin.infraestructure.delivery
 import main.kotlin.core.domain.exception.DomainException
 import main.kotlin.infraestructure.exception.SupermarketNotFoundException
 
-object ExceptionHandler {
+object GlobalExceptionHandler {
 
     fun <T> handle(action: () -> T): Result<T> =
         try {

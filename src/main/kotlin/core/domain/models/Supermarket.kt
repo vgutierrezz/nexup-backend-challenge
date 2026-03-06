@@ -5,6 +5,8 @@ import main.kotlin.core.domain.exception.InvalidNameException
 import main.kotlin.core.domain.exception.ProductAlreadyExistsException
 import main.kotlin.core.domain.exception.ProductNotFoundException
 import java.math.BigDecimal
+import java.time.DayOfWeek
+import java.time.LocalTime
 
 class Supermarket(
     val id: Long,
@@ -65,5 +67,15 @@ class Supermarket(
     private fun findProduct(productId: Long): SupermarketProduct {
         return products.find { it.productId == productId }
             ?: throw ProductNotFoundException(productId)
+    }
+
+    // ============ MÉTODOS PARA HORARIOS ============
+
+    fun getOpenHours(): OpenHours? = hours
+
+    fun hasOpenHours(): Boolean = hours != null
+
+    fun isOpenNow(day: DayOfWeek, time: LocalTime): Boolean {
+        return hours?.isOpen(day, time) ?: false
     }
 }

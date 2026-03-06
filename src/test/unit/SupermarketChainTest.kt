@@ -1,4 +1,4 @@
-package com.nexup.challenge.domain.models
+package main.kotlin.core.domain.models
 
 import main.kotlin.core.domain.exception.InvalidNameException
 import org.junit.jupiter.api.Test
